@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     // 选择图片
     private val pickImage = registerForActivityResult(
-            ActivityResultContracts.GetContent()
+        ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
             try {
@@ -53,25 +53,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 后台线程执行 OpenCV 直方图计算，UI 线程仅负责界面更新。
+     *
+     * 计时区间: 灰度转换 → calcHist → normalize → 绘制直方图
+     * (Bitmap → Mat 转换不计入耗时)
+     */
     private fun computeAndDisplayHistogram(bitmap: Bitmap) {
         Thread {
-            // 计算直方图，记录耗时
-            val startTime = System.currentTimeMillis()
-
-            // 获取像素数组（一次性拷贝，减少JNI调用开销）
-            val width = bitmap.width
-            val height = bitmap.height
-            val pixelCount = width * height
-            val pixels = IntArray(pixelCount)
-            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-            val histogram = HistogramUtil.computeHistogramParallel(pixels)
-
-            val endTime = System.currentTimeMillis()
-            val costMs = endTime - startTime
-
-            // 生成直方图Bitmap
-            val histogramBitmap = HistogramUtil.generateHistogramBitmap(histogram)
+            // HistogramUtil.computeHistogram 内部完成全部管线:
+            //   Bitmap→Mat → cvtColor → calcHist → normalize → 绘制 256×100 Bitmap
+            // 返回 (直方图 Bitmap, 耗时 ms)
+            val (histogramBitmap, costMs) = HistogramUtil.computeHistogram(bitmap)
 
             runOnUiThread {
                 histogramView.setImageBitmap(histogramBitmap)
