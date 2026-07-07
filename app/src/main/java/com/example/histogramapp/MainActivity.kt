@@ -12,7 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import java.io.InputStream
 
-class MainActivity : AppCompatActivity() {
+class       MainActivity : AppCompatActivity() {
 
     private lateinit var imageView: ImageView
     private lateinit var histogramView: ImageView
@@ -61,14 +61,22 @@ class MainActivity : AppCompatActivity() {
      */
     private fun computeAndDisplayHistogram(bitmap: Bitmap) {
         Thread {
-            // HistogramUtil.computeHistogram 内部完成全部管线:
-            //   Bitmap→Mat → cvtColor → calcHist → normalize → 绘制 256×100 Bitmap
-            // 返回 (直方图 Bitmap, 耗时 ms)
-            val (histogramBitmap, costMs) = HistogramUtil.computeHistogram(bitmap)
+            try {
+                // HistogramUtil.computeHistogram 内部完成全部管线:
+                //   Bitmap→Mat → cvtColor → calcHist → normalize → 绘制 256×100 Bitmap
+                // 返回 (直方图 Bitmap, 耗时 ms)
+                val (histogramBitmap, costMs) = HistogramUtil.computeHistogram(bitmap)
 
-            runOnUiThread {
-                histogramView.setImageBitmap(histogramBitmap)
-                tvTime.text = "直方图生成耗时: ${costMs}ms"
+                runOnUiThread {
+                    histogramView.setImageBitmap(histogramBitmap)
+                    tvTime.text = "直方图生成耗时: ${costMs}ms"
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this, "图像处理失败，请重试", Toast.LENGTH_LONG).show()
+                    histogramView.setImageBitmap(null)
+                    tvTime.text = "直方图生成耗时: -- ms"
+                }
             }
         }.start()
     }
