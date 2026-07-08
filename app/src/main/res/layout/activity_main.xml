@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  HistogramApp 主界面布局文件
+
+  布局结构 (自上而下):
+  ┌──────────────────────────────┐
+  │ [选择图片]           Button  │  用户点击选择相册图片
+  ├──────────────────────────────┤
+  │                              │
+  │  原图预览         ImageView  │  scaleType=fitCenter, 居中缩放
+  │                              │  layout_weight=1, 占据剩余空间
+  ├──────────────────────────────┤
+  │  直方图生成耗时: XXms        │  TextView, 居中加粗, 16sp
+  ├──────────────────────────────┤
+  │  直方图 (256×100)  标签      │  TextView, 居中, 14sp
+  │  ▊▊ ▊▊▊ ▊▊ ▊▊▊▊  ImageView  │  scaleType=fitXY, 固定 100dp 高
+  └──────────────────────────────┘
+
+  设计说明:
+  - 使用 LinearLayout vertical 纵向排列，简单直观
+  - 原图区域使用 layout_weight=1 填充剩余空间
+  - 直方图区域固定 100dp 高，与 256×100 位图的比例匹配
+  - fitXY 确保直方图宽度填满屏幕，避免出现空白边距
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 选择图片按钮 -->
+    <!--
+      选择图片按钮
+      - textAllCaps="false": 禁用系统默认的全大写转换，显示 "选择图片" 而非 "选择图片"
+    -->
     <Button
         android:id="@+id/btnSelect"
         android:layout_width="match_parent"
@@ -13,7 +39,12 @@
         android:text="选择图片"
         android:textAllCaps="false" />
 
-    <!-- 原图显示 -->
+    <!--
+      原图预览区域
+      - layout_weight="1": 占据 LinearLayout 中除固定高度组件外的全部剩余空间
+      - scaleType="fitCenter": 等比缩放图片适配 ImageView，居中显示，不裁剪
+      - background="#EEEEEE": 浅灰色背景，加载前和空白区域可见
+    -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
@@ -23,7 +54,13 @@
         android:scaleType="fitCenter"
         android:background="#EEEEEE" />
 
-    <!-- 耗时显示 -->
+    <!--
+      耗时显示文字
+      - textStyle="bold": 加粗，使耗时数字醒目
+      - textSize="16sp": sp 单位随系统字体大小缩放，保证可读性
+      - gravity="center": 文字水平居中
+      - 默认文本 "-- ms": 计算完成前显示占位符
+    -->
     <TextView
         android:id="@+id/tvTime"
         android:layout_width="match_parent"
@@ -34,7 +71,7 @@
         android:textStyle="bold"
         android:gravity="center" />
 
-    <!-- 直方图显示 -->
+    <!-- 直方图区域标签 -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,6 +80,14 @@
         android:textSize="14sp"
         android:gravity="center" />
 
+    <!--
+      直方图显示区域
+      - layout_height="100dp": 固定高度，与直方图的 100px 对应
+      - scaleType="fitXY": 水平拉伸填满宽度，256px 水平均匀分布
+                          垂直方向维持比例 (100dp 对应归一化值 100)
+      - background="#FFFFFF": 白色背景，与直方图位图的白底一致
+                             即位图加载前显示纯白背景
+    -->
     <ImageView
         android:id="@+id/histogramView"
         android:layout_width="match_parent"
